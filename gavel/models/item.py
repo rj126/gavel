@@ -15,7 +15,6 @@ class Item(db.Model):
     active = db.Column(db.Boolean, default=True, nullable=False)
     viewed = db.relationship('Annotator', secondary=view_table)
     prioritized = db.Column(db.Boolean, default=False, nullable=False)
-    overrideSkip = False
 
     mu = db.Column(db.Float)
     sigma_sq = db.Column(db.Float)
@@ -26,7 +25,6 @@ class Item(db.Model):
         self.description = description
         self.mu = crowd_bt.MU_PRIOR
         self.sigma_sq = crowd_bt.SIGMA_SQ_PRIOR
-        self.overrideSkip = False
 
     @classmethod
     def by_id(cls, uid):

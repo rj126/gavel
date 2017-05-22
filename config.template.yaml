@@ -160,5 +160,10 @@ email_body: null
 # very least.
 send_stats: null
 
-# threshold of skips after which a project (item) will be diabled
+# threshold of skips after which a project (item) will be disabled
+# defaults to 'Infinity'
+
+# this settings determines when a project is automatically disabled. After x amount of skips 
+# of a project (inputted as the value of the skip_threshold config variable), a project will 
+# be automatically skipped
 skip_threshold: null

@@ -13,12 +13,10 @@ import urllib.parse
 import xlrd
 
 ALLOWED_EXTENSIONS = set(['csv', 'xlsx', 'xls'])
-print("hi it's me")
 
 @app.route('/admin/')
 @utils.requires_auth
 def admin():
-    print(settings.SKIP_THRESHOLD)
     annotators = Annotator.query.order_by(Annotator.id).all()
     items = Item.query.order_by(Item.id).all()
     decisions = Decision.query.all()
@@ -37,7 +35,7 @@ def admin():
         for i in a.ignore:
             if a.id not in viewed[i.id]:
                 skipped[i.id] = skipped.get(i.id, 0) + 1
-                if skipped[i.id]>=settings.SKIP_THRESHOLD and i.overrideSkip == False:
+                if skipped[i.id]>=settings.SKIP_THRESHOLD:
                     i.active = False
     # settings
     setting_closed = Setting.value_of(SETTING_CLOSED) == SETTING_TRUE
@@ -55,7 +53,6 @@ def admin():
 @app.route('/admin/item', methods=['POST'])
 @utils.requires_auth
 def item():
-    print("hello2")
     action = request.form['action']
     if action == 'Submit':
         data = parse_upload_form()
@@ -74,14 +71,9 @@ def item():
         Item.by_id(item_id).prioritized = target_state
         db.session.commit()
     elif action == 'Disable' or action == 'Enable':
-        print("here")
         item_id = request.form['item_id']
         target_state = action == 'Enable'
         Item.by_id(item_id).active = target_state
-        if action == 'Enable':
-            print(item_id)
-            print(Item.by_id(item_id).overrideSkip)
-            Item.by_id(item_id).overrideSkip = True 
         db.session.commit()
     elif action == 'Delete':
         item_id = request.form['item_id']
@@ -95,13 +87,11 @@ def item():
 
 
 def allowed_file(filename):
-    print('hello3')
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def parse_upload_form():
-    print('hello4')
     f = request.files['file']
     data = []
     if f and allowed_file(f.filename):
@@ -121,7 +111,6 @@ def parse_upload_form():
 @app.route('/admin/item_patch', methods=['POST'])
 @utils.requires_auth
 def item_patch():
-    print('hello5')
     item = Item.by_id(request.form['item_id'])
     if not item:
         return utils.user_error('Item %s not found ' % request.form['item_id'])
@@ -137,7 +126,6 @@ def item_patch():
 @app.route('/admin/annotator', methods=['POST'])
 @utils.requires_auth
 def annotator():
-    print('hello6')
     action = request.form['action']
     if action == 'Submit':
         data = parse_upload_form()
@@ -180,7 +168,6 @@ def annotator():
 @app.route('/admin/setting', methods=['POST'])
 @utils.requires_auth
 def setting():
-    print('hello6')
     key = request.form['key']
     if key == 'closed':
         action = request.form['action']
@@ -192,7 +179,6 @@ def setting():
 @app.route('/admin/item/<item_id>/')
 @utils.requires_auth
 def item_detail(item_id):
-    print('hello6')
     item = Item.by_id(item_id)
     if not item:
         return utils.user_error('Item %s not found ' % item_id)
@@ -215,7 +201,6 @@ def item_detail(item_id):
 @app.route('/admin/annotator/<annotator_id>/')
 @utils.requires_auth
 def annotator_detail(annotator_id):
-    print('hello6')
     annotator = Annotator.by_id(annotator_id)
     if not annotator:
         return utils.user_error('Annotator %s not found ' % annotator_id)
@@ -237,11 +222,9 @@ def annotator_detail(annotator_id):
         )
 
 def annotator_link(annotator):
-        print('hello6')
         return urllib.parse.urljoin(settings.BASE_URL, url_for('login', secret=annotator.secret))
 
 def email_invite_links(annotators):
-    print('hello6')
     if settings.DISABLE_EMAIL or annotators is None:
         return
     if not isinstance(annotators, list):
